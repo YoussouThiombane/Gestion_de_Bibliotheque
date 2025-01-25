@@ -41,7 +41,7 @@ var books = new List<BookDTOs>
         PubDate = new DateOnly(2004,1,7)
     }
 };
-// EndPoint pour recuperer la liste de livres
+// EndPoint pour recuperer la liste des livres
 app.MapGet("/books", async(BookDbContext dbContext) => {
     var book = await dbContext.Books.ToListAsync();
     return Results.Ok(book);
@@ -50,14 +50,15 @@ app.MapGet("/books", async(BookDbContext dbContext) => {
 #endregion
 
 #region CREATION DE ENDPONIT POUR RECUPERER A PARTIR DE L'ID
-//app.MapGet("/books/{id}", (int id) => books.FirstOrDefault(book=>book.Id == id));
+
 app.MapGet("/books/{id}", async(int id, BookDbContext dbContext)=>
 {
     try{
         var book = await dbContext.Books!.FindAsync(id);
         return Results.Ok(book);
     }
-    catch(Exception ex){
+    catch (Exception)
+    {
         return Results.NotFound(new {Message = $"Le book avec l'ID {id} n'existe pas !"});
     }
     
@@ -68,7 +69,6 @@ app.MapGet("/books/{id}", async(int id, BookDbContext dbContext)=>
 // Creation d'un Endponit qui permet d'ajouter des livres
 app.MapPost("/books", async (CreateBookDTOs newBookDTOS, IMapper mapper, BookDbContext dbContext) =>
 {
-    //int newId = books.Any() ? books.Max(book=> book.Id) +1 : 1;
     var newBook = mapper.Map<Book>(newBookDTOS);
     dbContext.Books!.Add(newBook);
     await dbContext.SaveChangesAsync();
@@ -81,7 +81,6 @@ app.MapPost("/books", async (CreateBookDTOs newBookDTOS, IMapper mapper, BookDbC
 
 app.MapPut("/books/{id}", async (int id, UpdateBookDTOs newBook, IMapper mapper, BookDbContext dbContext) =>
 {
-    //var bookToUpdate = books.FirstOrDefault(b => b.Id == id);
     var bookToUpdate = await dbContext.Books!.FindAsync(id);
     if(bookToUpdate is null)
     {
